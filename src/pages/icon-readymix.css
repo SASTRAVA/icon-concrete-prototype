@@ -261,7 +261,7 @@ p { color: var(--ic-body); line-height: 1.7; }
 .ic-plant-content>p svg { color: var(--ic-orange-dark); flex: 0 0 auto; }
 .ic-nearest { align-items: center; color: var(--ic-body); display: flex; font-size: 11px; gap: 7px; }
 .ic-nearest svg { color: #43824c; }
-.ic-plant-links { border-top: 1px solid var(--ic-line); display: flex; gap: 25px; margin-top: 20px; padding-top: 15px; }
+.ic-plant-links { border-top: 1px solid var(--ic-line); display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 20px; padding-top: 15px; }
 .ic-plant-links a, .ic-plant-links button { align-items: center; background: none; border: 0; color: var(--ic-ink); display: flex; font: 9px var(--ic-mono); gap: 8px; letter-spacing: .07em; padding: 7px 0; text-decoration: none; }
 .ic-plant-links a:hover, .ic-plant-links button:hover { color: var(--ic-orange-dark); }
 .ic-contact { background: var(--ic-ink); color: white; display: grid; gap: 8vw; grid-template-columns: 1fr .72fr; padding: clamp(75px, 9vw, 130px) 9%; }
