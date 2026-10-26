@@ -1,23 +1,8 @@
-:root {
-  font-family: 'DM Sans', sans-serif;
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color-scheme: light;
-  background: #f4f2ec;
-}
-
-html { scroll-behavior: smooth; }
+:root { font-family: 'DM Sans', Arial, sans-serif; font-synthesis: none; text-rendering: optimizeLegibility; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; color-scheme: light; background: #f7f6f3; }
+html { min-width: 320px; scroll-behavior: smooth; }
 body { margin: 0; min-width: 320px; min-height: 100vh; }
-button, input, select { font: inherit; }
-button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
-  outline: 2px solid #e65e28;
-  outline-offset: 3px;
-}
-.icon-skip-link { position: fixed; z-index: 100; left: 12px; top: -60px; background: #fff; color: #1f2925; padding: 12px 16px; }
-.icon-skip-link:focus { top: 12px; }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
-}
+button, input, select, textarea { font: inherit; }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid #ff985d; outline-offset: 3px; }
+.mp-skip-link { background: white; color: #16181b; left: 12px; padding: 11px 15px; position: fixed; top: -70px; z-index: 100; }
+.mp-skip-link:focus { top: 12px; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }

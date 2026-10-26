@@ -3,4 +3,10 @@
   <url>
     <loc>https://icon-concrete-prototype.vercel.app/</loc>
   </url>
+  <url><loc>https://icon-concrete-prototype.vercel.app/about</loc></url>
+  <url><loc>https://icon-concrete-prototype.vercel.app/services</loc></url>
+  <url><loc>https://icon-concrete-prototype.vercel.app/projects</loc></url>
+  <url><loc>https://icon-concrete-prototype.vercel.app/plants</loc></url>
+  <url><loc>https://icon-concrete-prototype.vercel.app/contact</loc></url>
+  <url><loc>https://icon-concrete-prototype.vercel.app/gallery</loc></url>
 </urlset>
