@@ -1,106 +1,289 @@
-import { useMemo, useState } from 'react';
-import { ArrowDown, ArrowRight, Check, ClipboardCheck, Factory, MapPin, Menu, Phone, Truck, X } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  ArrowDown, ArrowDownRight, ArrowRight, Check, ChevronLeft, ChevronRight,
+  ClipboardCheck, Factory, MapPin, Menu, Phone, Ruler, ShieldCheck, Truck,
+  X, MessageCircle, Building2, House, Plus
+} from 'lucide-react';
 import './icon-readymix.css';
 
-const grades = ['M10', 'M15', 'M20', 'M25', 'M30', 'M35', 'M40', 'M45', 'M50', 'M55', 'M60'];
-const applications = ['Foundation', 'Slab', 'Columns & core', 'Infrastructure'];
-const projects = [
-  { name: 'Residential', detail: 'Foundations, slabs & structural pours', image: 'photo-1600607687939-ce8a6c25118c' },
-  { name: 'Commercial', detail: 'Reliable supply for demanding sites', image: 'photo-1486406146926-c627a92ad1ab' },
-  { name: 'Infrastructure', detail: 'Consistent concrete, planned around your pour', image: 'photo-1541888946425-d81bb19240f5' },
+const phone = '+91 7997777078';
+const phoneDigits = '917997777078';
+const email = 'info@iconconcrete.co.in';
+const grades = [
+  { name: 'M10', use: 'PCC & levelling' },
+  { name: 'M15', use: 'Blinding & pathways' },
+  { name: 'M20', use: 'Residential slabs' },
+  { name: 'M25', use: 'Beams & columns' },
+  { name: 'M30', use: 'Structural pours' },
+  { name: 'M35', use: 'Higher-load structures' },
+  { name: 'M40', use: 'Specialist applications' },
 ];
-const clients = ['Emaar', 'MY HOME', 'GREEN SPACE', 'AGA KHAN', 'PRANATHI', 'APARNA'];
-const img = (id, width = 1500) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=85`;
+const services = [
+  { title: 'Ready-mix concrete', text: 'Concrete batched to your project specification and coordinated for delivery.', Icon: Factory },
+  { title: 'Concrete pumping', text: 'Ask about pump support for sites where access or pour height needs planning.', Icon: Ruler },
+  { title: 'Commercial delivery', text: 'Coordinate supply around commercial site access and planned pour windows.', Icon: Building2 },
+  { title: 'Residential delivery', text: 'Plan concrete delivery for home foundations, slabs and structural work.', Icon: House },
+  { title: 'Transport', text: 'Discuss transit mixer access, site approach and delivery timing with the team.', Icon: Truck },
+  { title: 'Concrete additives', text: 'Enquire about admixtures to suit your project specification and conditions.', Icon: Plus },
+];
+const partners = ['Trishala', 'Synergy', 'Green Space', 'AGR Construction', 'Riddhi', 'Dream View', 'AGA Infra (My Home Group)', 'Happy Homes Housing'];
+const testimonials = [
+  { quote: 'We are happy with the professional and quality conscious approach, including the unparalleled teamwork exhibited by this team.', name: 'Green Space', role: 'Client feedback' },
+  { quote: 'We are happy with the professional and quality conscious approach of the entire RMC team. Special appreciation for the RMC site team for excellent coordination, timely supply and adhering to best site safety practices.', name: 'Happy Homes Housing', role: 'Client feedback' },
+  { quote: 'The Icon Concrete industry is growing due to the superior technical properties over normal concrete, but the potential is still huge.', name: 'AGA Infra (My Home Group)', role: 'Client feedback' },
+];
+const projects = [
+  { category: 'Residential', title: 'Residential construction', description: 'A placeholder for a verified residential project case study.', image: 'photo-1600607687939-ce8a6c25118c' },
+  { category: 'Commercial', title: 'Commercial development', description: 'A placeholder for a verified commercial project case study.', image: 'photo-1486406146926-c627a92ad1ab' },
+  { category: 'Infrastructure', title: 'Infrastructure works', description: 'A placeholder for a verified infrastructure project case study.', image: 'photo-1541888946425-d81bb19240f5' },
+  { category: 'Residential', title: 'Site pour in progress', description: 'Replace with an approved project name, location and delivery details.', image: 'photo-1504307651254-35680f356dfd' },
+];
+const plants = [
+  {
+    id: 'north', name: 'Gandi Maisamma · Medchal Road',
+    address: 'Survey No. 492, 493, Gandi Maisamma to Medchal Road, Telangana',
+    map: 'https://maps.google.com/?q=Survey+No+492+493+Gandi+Maisamma+to+Medchal+Road+Telangana',
+    photo: 'photo-1519003722824-194d4455a60c',
+  },
+  {
+    id: 'south', name: 'CBIT Post · Khanapur',
+    address: 'CBIT Post, Khanapur, Hyderabad',
+    map: 'https://maps.google.com/?q=CBIT+Post+Khanapur+Hyderabad',
+    photo: 'photo-1487958449943-2429e8be8625',
+  },
+];
+const image = (id, width = 1600) => `https://images.unsplash.com/${id}?auto=format&fit=crop&w=${width}&q=82`;
+
+function SectionLabel({ number, children }) {
+  return <div className="ic-kicker"><span>{number}</span><span>{children}</span></div>;
+}
 
 export default function IconReadymix() {
-  const [grade, setGrade] = useState('M25');
-  const [service, setService] = useState('Ready mix concrete');
-  const [volume, setVolume] = useState('');
-  const [application, setApplication] = useState('Slab');
-  const [wizardStep, setWizardStep] = useState(0);
-  const [activePlant, setActivePlant] = useState('Plant 1 · Mirzaguda');
-  const [enquiryType, setEnquiryType] = useState('single-pour');
   const [menuOpen, setMenuOpen] = useState(false);
   const [quoteOpen, setQuoteOpen] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
+  const [quoteSent, setQuoteSent] = useState(false);
+  const [grade, setGrade] = useState('M25');
+  const [service, setService] = useState('Ready-mix concrete');
+  const [volume, setVolume] = useState('');
+  const [pump, setPump] = useState('No');
+  const [application, setApplication] = useState('Slab');
+  const [wizardStep, setWizardStep] = useState(0);
+  const [plant, setPlant] = useState(plants[0].id);
+  const [activeGrade, setActiveGrade] = useState('M25');
+  const [calculatorType, setCalculatorType] = useState('Slab');
+  const [projectFilter, setProjectFilter] = useState('All');
+  const [lightbox, setLightbox] = useState(null);
+  const [testimonial, setTestimonial] = useState(0);
+  const [dimensions, setDimensions] = useState({ length: '', width: '', thickness: '' });
   const [form, setForm] = useState({ name: '', phone: '', location: '', date: '', company: '', projectType: 'Residential' });
-  const summary = useMemo(() => `${application} · ${grade} · ${service}${volume ? ` · ${volume} m³` : ''}`, [application, grade, service, volume]);
+  const chosenPlant = plants.find((item) => item.id === plant) ?? plants[0];
+  const visibleProjects = projectFilter === 'All' ? projects : projects.filter((item) => item.category === projectFilter);
+  const calculatedVolume = useMemo(() => {
+    const { length, width, thickness } = dimensions;
+    if (!length || !width || !thickness) return 0;
+    const depth = calculatorType === 'Column' ? Number(thickness) : Number(thickness) / 1000;
+    return Number((Number(length) * Number(width) * depth).toFixed(2));
+  }, [dimensions, calculatorType]);
+  const quoteSummary = `${application} · ${grade} · ${service}${volume ? ` · ${volume} m³` : ''}`;
+  const whatsappMessage = `Hi Icon Concrete, I'd like a quote. Name: ${form.name}. Phone: ${form.phone}. Project type: ${form.projectType}. Grade: ${grade}. Service: ${service}. Quantity: ${volume || 'to be confirmed'} m³. Pump required: ${pump}. Site: ${form.location}. Required date: ${form.date}.${form.company ? ` Company / project: ${form.company}.` : ''}`;
+  const whatsappUrl = `https://wa.me/${phoneDigits}?text=${encodeURIComponent(whatsappMessage)}`;
 
+  useEffect(() => {
+    const elements = document.querySelectorAll('.ic-reveal');
+    if (!('IntersectionObserver' in window)) {
+      elements.forEach((element) => element.classList.add('is-visible'));
+      return undefined;
+    }
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    elements.forEach((element) => observer.observe(element));
+    return () => observer.disconnect();
+  }, []);
 
-  function sendEnquiry(event) {
+  useEffect(() => {
+    if (!quoteOpen && !lightbox) return undefined;
+    const closeOnEscape = (event) => {
+      if (event.key === 'Escape') { setQuoteOpen(false); setLightbox(null); }
+    };
+    window.addEventListener('keydown', closeOnEscape);
+    return () => window.removeEventListener('keydown', closeOnEscape);
+  }, [quoteOpen, lightbox]);
+
+  function openQuote(selectedService = service) {
+    setService(selectedService);
+    setQuoteSent(false);
+    setQuoteOpen(true);
+  }
+
+  function updateDimension(key, value) {
+    setDimensions((current) => ({ ...current, [key]: value }));
+  }
+
+  function submitQuote(event) {
     event.preventDefault();
-    const message = `Hi Icon Concrete, I'd like a ${enquiryType === 'project-supply' ? 'project supply' : 'single pour'} quote. Project type: ${form.projectType}. Grade: ${grade}. Service: ${service}. Volume: ${volume || 'not specified'} m³. Site: ${form.location}. Pour date: ${form.date || 'to be confirmed'}. Name: ${form.name}. Phone: ${form.phone}.${form.company ? ` Company: ${form.company}.` : ''}`;
-    window.open(`https://wa.me/917997777078?text=${encodeURIComponent(message)}`, '_blank', 'noopener,noreferrer');
-    setSubmitted(true);
+    setQuoteSent(true);
   }
 
   return (
     <main className="icon-site" id="top">
-      <header className="icon-nav">
-        <a className="icon-wordmark" href="#top" aria-label="Icon Concrete home"><span className="icon-mark">I</span><span>ICON<small>CONCRETE</small></span></a>
-        <nav className={menuOpen ? 'icon-links open' : 'icon-links'} aria-label="Main navigation">
-          <a href="#capabilities" onClick={() => setMenuOpen(false)}>Capabilities</a><a href="#services" onClick={() => setMenuOpen(false)}>Solutions</a><a href="#clients" onClick={() => setMenuOpen(false)}>Clients</a><a href="#plants" onClick={() => setMenuOpen(false)}>Our plants</a><a href="#contact" onClick={() => setMenuOpen(false)}>Contact</a>
+      <header className="ic-nav">
+        <a className="ic-brand" href="#top" aria-label="Icon Concrete home">
+          <span className="ic-brand-symbol">I</span><span className="ic-brand-type">ICON<small>CONCRETE</small></span>
+        </a>
+        <nav className={menuOpen ? 'ic-nav-links is-open' : 'ic-nav-links'} aria-label="Main navigation">
+          {[['About', '#about'], ['Services', '#services'], ['Projects', '#projects'], ['Plants', '#plants'], ['Contact', '#contact']].map(([label, href]) => (
+            <a key={href} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
+          ))}
         </nav>
-        <button className="icon-nav-cta" onClick={() => { setSubmitted(false); setQuoteOpen(true); }}>PLAN A POUR <ArrowRight size={15}/></button>
-        <button className="icon-menu" aria-label={menuOpen ? 'Close menu' : 'Open menu'} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X/> : <Menu/>}</button>
+        <button className="ic-nav-cta" onClick={() => openQuote()}>REQUEST A QUOTE <ArrowRight size={15} /></button>
+        <button className="ic-menu-button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} onClick={() => setMenuOpen(!menuOpen)}>{menuOpen ? <X /> : <Menu />}</button>
       </header>
 
-      <section className="icon-hero">
-        <img className="icon-hero-image" src={img('photo-1503387762-592deb58ef4e')} alt="Architectural construction plans and engineering drawings" />
-        <div className="icon-hero-overlay" />
-        <div className="icon-blueprint-grid" />
-        <svg className="icon-hero-drawing" viewBox="0 0 1200 680" aria-hidden="true"><g fill="none" stroke="currentColor" strokeWidth="1.2"><path d="M385 512V317l161-119 164 119v195M428 512V340l118-87 121 87v172M350 512h396M385 317h325M478 512V388h222v124M501 388v124m45-124v124m45-124v124m45-124v124m45-124v124"/><path d="M332 529h398M365 295l181-134 184 134M546 161v-63m0 0h292M838 98v422M808 117h62m-62 33h62m-62 33h62m-62 33h62m-62 33h62m-62 33h62m-62 33h62m-62 33h62m-62 33h62m-62 33h62m-62 33h62M332 542H232v-71h100m398 0h108v71H730"/><path d="M240 471l42-56 42 56m-84 0v71m84-71v71m-84-32h84m-54-39v71m24-71v71M736 471l42-56 42 56m-84 0v71m84-71v71m-84-32h84m-54-39v71m24-71v71"/><path d="M349 285h-37v-24h37m198-121v-36m0 0h88m-285 425h222m-222 8h222M232 558v-10m100 10v-10m398 10v-10m108 10v-10" strokeDasharray="7 5"/></g><g fill="currentColor" fontFamily="monospace" fontSize="11"><text x="385" y="574">A—A / STRUCTURAL POUR PLAN</text><text x="856" y="111">+12.40</text><text x="856" y="522">±00.00</text></g></svg>
-        <div className="icon-hero-content"><div className="icon-eyebrow"><span/> READY MIX CONCRETE · HYDERABAD</div><h1>From plan<br/>to <em>pour.</em></h1><p>Build your concrete order one decision at a time. Choose the structure, grade and delivery support, then share your site details.</p><a className="icon-button icon-button-light" href="#configure">START YOUR POUR PLAN <ArrowDown size={16}/></a><button className="icon-watch" onClick={()=>document.querySelector('#configure')?.scrollIntoView({behavior:'smooth'})}><span>▶</span> SEE HOW IT WORKS</button></div>
-        <div className="icon-hero-meta"><span>01 / 06 &nbsp; THE POUR PLAN</span><span>ICON CONCRETE · SINCE 2017</span></div>
-        <div className="icon-hero-side">MIX DESIGN&nbsp; / &nbsp;DELIVERY&nbsp; / &nbsp;QUALITY</div>
+      <section className="ic-hero" aria-labelledby="hero-title">
+        <img className="ic-hero-image" src={image('photo-1541888946425-d81bb19240f5', 2000)} alt="Concrete pour at an active construction site — replace with a real Icon Concrete photo" fetchPriority="high" />
+        <div className="ic-hero-shade" />
+        <div className="ic-hero-grid" aria-hidden="true" />
+        <div className="ic-hero-content">
+          <div className="ic-overline"><span /> ICON PREMIER READYMIX CONCRETE <i>·</i> HYDERABAD</div>
+          <h1 id="hero-title">Strength you can<br />build on. <em>Delivered on time.</em></h1>
+          <p>Ready-mix concrete for contractors, builders and developers across Hyderabad. Tell us about your pour and we’ll help plan the next step.</p>
+          <div className="ic-hero-actions">
+            <button className="ic-button ic-button-orange" onClick={() => openQuote()}>REQUEST A QUOTE <ArrowRight size={17} /></button>
+            <a className="ic-button ic-button-outline" href={`https://wa.me/${phoneDigits}?text=${encodeURIComponent('Hi Icon Concrete, I would like to discuss a concrete requirement.')}`} target="_blank" rel="noreferrer"><MessageCircle size={17} /> WHATSAPP US</a>
+          </div>
+        </div>
+        <div className="ic-hero-stamp"><span>ICON / 2017</span><strong>Concrete<br />for the work<br />ahead.</strong><ArrowDownRight /></div>
+        <div className="ic-hero-bottom"><span>READY MIX CONCRETE · PUMPING · DELIVERY</span><a href="#about">SCROLL TO EXPLORE <ArrowDown size={14} /></a></div>
       </section>
 
-      <section className="icon-intro" id="configure"><div className="icon-kicker">02 / START WITH YOUR PROJECT</div><div className="icon-intro-grid"><h2>Every pour<br/>has a <em>plan.</em></h2><div><p className="icon-lead">Two plants serve Hyderabad’s northwest and southwest corridors. Share your site so the team can confirm the right plant, grade and delivery availability.</p><span className="icon-note"><ClipboardCheck size={17}/> Coverage and schedule confirmed against your site.</span></div></div><div className="icon-buying-paths"><button className={enquiryType==='single-pour'?'active':''} onClick={()=>setEnquiryType('single-pour')}><span>01 / SINGLE POUR</span><strong>One site. One pour.</strong><small>For contractors, home builders and individual site enquiries.</small><b>PLAN A POUR <ArrowRight size={14}/></b></button><button className={enquiryType==='project-supply'?'active':''} onClick={()=>setEnquiryType('project-supply')}><span>02 / PROJECT SUPPLY</span><strong>Planning a development?</strong><small>For developers and project teams coordinating repeat or phased supply.</small><b>PLAN PROJECT SUPPLY <ArrowRight size={14}/></b></button></div></section>
+      <section className="ic-trust" aria-label="Company facts">
+        <div><span>01 / LOCAL EXPERIENCE</span><strong>Est. 2017</strong><small>Hyderabad, India</small></div>
+        <div><span>02 / PLANT NETWORK</span><strong>2 plants</strong><small>Serving Hyderabad area</small></div>
+        <div><span>03 / BATCHING</span><strong>Automated</strong><small>Computerised batching</small></div>
+        <div><span>04 / DELIVERY</span><strong>On-time focus</strong><small>Planned around your pour</small></div>
+      </section>
 
-      <section className="icon-config" aria-label="Interactive concrete pour planner">
-        <div className="icon-config-visual">
-          <div className="icon-plan-topline"><span>LIVE BLUEPRINT / {String(wizardStep+1).padStart(2,'0')}</span><span>PREVIEW UPDATES WITH YOUR SELECTIONS</span></div>
-          <svg className={`icon-plan-drawing plan-${application.toLowerCase().replaceAll(' ','-').replace('&','and')}`} viewBox="0 0 800 650" role="img" aria-label={`${application} structural blueprint, ${grade} concrete, ${service.toLowerCase()}${volume ? `, ${volume} cubic metres` : ''}`}>
-            <defs><pattern id="planGrid" width="28" height="28" patternUnits="userSpaceOnUse"><path d="M28 0H0V28" fill="none" stroke="currentColor" strokeOpacity=".14" strokeWidth=".7"/></pattern></defs>
-            <rect width="800" height="650" fill="url(#planGrid)"/><g fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M107 482h582M133 463h530v-25H133zM164 438V231h472v207M182 418h436V251H182z"/>
-              <path d="M182 251l218-137 218 137M212 251l188-116 188 116M400 114v-39m-11 0h22m-22 12h22"/>
-              <path d="M240 418V290h119v128m82 0V290h119v128M359 290h82m-82 42h82m-82 43h82m-82 43h82"/>
-              <path d="M107 506v22m582-22v22M107 518h582m-291-404v-30m0 0H147M147 84v398M147 98h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24m-24 24h24" strokeDasharray="7 5"/>
-              {application==='Foundation'&&<path className="plan-highlight" d="M164 438V231h472v207M182 418h436V251H182z"/>}
-              {application==='Slab'&&<path className="plan-highlight" d="M182 251h436v167H182zM240 251v167m59-167v167m60-167v167m82-167v167m60-167v167m59-167v167M182 307h436m-436 55h436"/>}
-              {application==='Columns & core'&&<path className="plan-highlight" d="M240 418V290h119v128m82 0V290h119v128m-260-99h260m-260 48h260"/>}
-              {application==='Infrastructure'&&<path className="plan-highlight" d="M110 370h578m-578 35h578m-540-35v35m75-35v35m75-35v35m75-35v35m75-35v35m75-35v35m75-35v35"/>}
-              {service==='Concrete pumping'&&<path className="plan-pump" d="M640 444l54-110 44-42m-37 42l31 13m-48-1l29 14m-35-31l25 14"/>}
-            </g><g fill="currentColor" fontFamily="monospace" fontSize="12"><text x="165" y="552">{application.toUpperCase()} / {grade}</text><text x="164" y="210">A</text><text x="642" y="210">A</text><text x="400" y="587" textAnchor="middle">{activePlant.toUpperCase()} · {volume||'VOLUME TBD'} m³</text><text x="650" y="455">{service==='Concrete pumping'?'PUMP ACCESS':'TRUCK ACCESS'}</text></g><g className="plan-measure" fill="none" stroke="currentColor"><path d="M182 232v-25m436 25v-25m-436 10h436m-436 203v22m436-22v22m-436-8h436"/></g>
-          </svg>
-          <div className="icon-config-caption"><span>ICON / POUR PLAN</span><span>{application.toUpperCase()} · {grade} · {service.toUpperCase()}</span></div>
+      <section className="ic-about ic-section" id="about">
+        <div className="ic-about-intro ic-reveal">
+          <SectionLabel number="01">ABOUT ICON CONCRETE</SectionLabel>
+          <h2>Young minds.<br /><em>Solid work.</em></h2>
+          <p className="ic-lead">Established in 2017, Icon Premier Readymix Concrete brings together a young and experienced team from the ready-mix and construction fields.</p>
+          <p>Based in Hyderabad, the team works with customers to plan concrete supply around each project’s specification, location and schedule. Speak with us to confirm what your site needs.</p>
+          <a className="ic-text-link" href="#plants">MEET THE PLANT NETWORK <ArrowRight size={15} /></a>
         </div>
-        <div className="icon-config-panel">
-          <div className="icon-wizard-progress" aria-label={`Step ${wizardStep+1} of 3`}>{['STRUCTURE','MIX','SITE'].map((label,index)=><button key={label} className={wizardStep===index?'current':wizardStep>index?'complete':''} onClick={()=>setWizardStep(index)}><span>{wizardStep>index?<Check size={11}/>:`0${index+1}`}</span>{label}</button>)}</div>
-          {wizardStep===0&&<><div className="icon-step">STEP 01 <span>THE STRUCTURE</span></div><h3>What are we<br/>pouring?</h3><p>Choose the structure to build your project plan. Your engineer’s specification determines the concrete grade.</p><div className="icon-application-grid">{applications.map((item,index)=><button key={item} className={application===item?'selected':''} onClick={()=>setApplication(item)}><span>0{index+1}</span><strong>{item}</strong><small>{item==='Foundation'?'Footings & foundation pour':item==='Slab'?'Floor plate & deck':item==='Columns & core'?'Vertical structural pour':'Road & infrastructure'}</small>{application===item&&<Check size={15}/>}</button>)}</div><button className="icon-button icon-button-dark icon-full" onClick={()=>setWizardStep(1)}>NEXT: CHOOSE YOUR MIX <ArrowRight size={16}/></button></>}
-          {wizardStep===1&&<><div className="icon-step">STEP 02 <span>THE MIX & DELIVERY</span></div><h3>Set the<br/>specification.</h3><p>Select the grade from your structural drawings, then tell us what delivery support your site needs.</p><div className="icon-grade-grid" role="group" aria-label="Select concrete grade">{grades.map(item=><button key={item} aria-pressed={grade===item} className={grade===item?'selected':''} onClick={()=>setGrade(item)}>{item}{grade===item&&<Check size={13}/>}</button>)}</div><div className="icon-service-options">{['Ready mix concrete','Concrete pumping'].map(item=><button key={item} onClick={()=>setService(item)} className={service===item?'selected':''}><span>{item==='Concrete pumping'?<Truck size={18}/>:<Factory size={18}/>}</span><span>{item}<small>{item==='Concrete pumping'?'Include a pump availability request':'Batching and plant-to-site coordination'}</small></span>{service===item&&<Check size={15}/>}</button>)}</div><div className="icon-wizard-buttons"><button onClick={()=>setWizardStep(0)}>← BACK</button><button className="icon-button icon-button-dark" onClick={()=>setWizardStep(2)}>NEXT: SITE DETAILS <ArrowRight size={16}/></button></div></>}
-          {wizardStep===2&&<><div className="icon-step">STEP 03 <span>THE SITE & POUR</span></div><h3>Place it<br/>on the plan.</h3><p>Share an approximate pour volume and site area. The team will confirm coverage, schedule and availability.</p><div className="icon-site-choice"><span>NEAREST PLANT TO CHECK</span>{['Plant 1 · Mirazaguda','Plant 2 · Gowdavalli'].map(item=><button key={item} className={activePlant===item?'selected':''} onClick={()=>setActivePlant(item)}>{item}{activePlant===item&&<Check size={14}/>}</button>)}</div><label className="icon-volume-label" htmlFor="volume">ESTIMATED VOLUME <span>Optional</span></label><div className="icon-volume-stepper"><button aria-label="Decrease volume" onClick={()=>setVolume(String(Math.max(0,Number(volume||0)-5)||''))}>−</button><input id="volume" inputMode="decimal" type="number" min="1" placeholder="Enter volume" value={volume} onChange={e=>setVolume(e.target.value)}/><span>m³</span><button aria-label="Increase volume" onClick={()=>setVolume(String(Number(volume||0)+5))}>+</button></div><div className="icon-wizard-buttons"><button onClick={()=>setWizardStep(1)}>← BACK</button><button className="icon-button icon-button-dark" onClick={()=>{setSubmitted(false);setQuoteOpen(true);}}>COMPLETE POUR PLAN <ArrowRight size={16}/></button></div><small className="icon-config-disclaimer">No online price estimate. Share your site in the next step for a project quote.</small></>}
+        <div className="ic-about-visual ic-reveal">
+          <img src={image('photo-1504307651254-35680f356dfd', 1200)} alt="Building construction site — replace with a real Icon Concrete photo" loading="lazy" />
+          <span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span>
+          <div className="ic-about-note"><span>HYDERABAD, TELANGANA</span><strong>Local knowledge.<br />Clear coordination.</strong></div>
+          <div className="ic-about-watermark">2017</div>
         </div>
       </section>
 
-      <section className="icon-proof" id="capabilities"><div className="icon-proof-head"><div><div className="icon-kicker">03 / BUILT TO SUPPLY</div><h2>Capacity with<br/><em>care.</em></h2></div><p>Two Hyderabad-area plants, coordinated fleet operations and an in-house testing lab support every order from dispatch to delivery.</p></div><div className="icon-stats"><div><strong>105</strong><span>m³/hr combined<br/>plant capacity</span></div><div><strong>28</strong><span>transit mixers<br/>across both plants</span></div><div><strong>7</strong><span>concrete pumps<br/>in the fleet</span></div><div><strong>145</strong><span>team members<br/>across operations</span></div></div><div className="icon-proof-image"><img src={img('photo-1519003722824-194d4455a60c')} alt="Ready mix concrete truck fleet"/><div><span>OPERATIONS / HYDERABAD</span><b>From batch plant<br/>to your site.</b></div></div><div className="icon-grades-band"><span>AVAILABLE GRADES</span><p>M10 <i/> M15 <i/> M20 <i/> M25 <i/> M30 <i/> M35 <i/> M40 <i/> M45 <i/> M50 <i/> M55 <i/> M60</p></div></section>
+      <section className="ic-values ic-section" aria-label="Our approach">
+        <div className="ic-values-heading ic-reveal"><SectionLabel number="02">HOW WE SHOW UP</SectionLabel><h2>Built on more<br />than <em>concrete.</em></h2></div>
+        <div className="ic-value-grid">
+          <article className="ic-value-card ic-reveal"><span>01</span><h3>Young minds</h3><p>Bring fresh thinking together with experience in ready-mix and construction.</p></article>
+          <article className="ic-value-card ic-reveal"><span>02</span><h3>Live on the level</h3><p>Act with care for customers, employees and the communities around our work.</p></article>
+          <article className="ic-value-card ic-reveal"><span>03</span><h3>Build relationships</h3><p>Good projects depend on people who communicate clearly and work together.</p></article>
+          <article className="ic-value-card ic-reveal"><span>04</span><h3>Deliver locally</h3><p>Focus on Hyderabad and coordinate supply around the needs of each site.</p></article>
+        </div>
+      </section>
 
-      <section className="icon-solutions" id="services"><div className="icon-kicker">04 / CONCRETE FOR THE WORK AHEAD</div><div className="icon-solutions-title"><h2>Made for the<br/><em>next pour.</em></h2><p>From home foundations to large commercial projects, we coordinate the right supply for your site.</p></div><div className="icon-project-grid">{projects.map((project,index)=><article key={project.name} className="icon-project-card"><img src={img(project.image,900)} alt={`${project.name} construction project`}/><div className="icon-project-overlay"><span>0{index+1} / APPLICATION</span><h3>{project.name}</h3><p>{project.detail}</p><button onClick={()=>{setService('Ready mix concrete');setSubmitted(false);setQuoteOpen(true);}}>DISCUSS YOUR PROJECT <ArrowRight size={14}/></button></div></article>)}</div></section>
+      <section className="ic-services ic-section" id="services">
+        <div className="ic-section-heading ic-reveal"><div><SectionLabel number="03">PRODUCTS & SERVICES</SectionLabel><h2>Concrete for<br /><em>what’s next.</em></h2></div><p>Share your drawings, grade and site details. The Icon Concrete team can discuss the right service and delivery plan for your project.</p></div>
+        <div className="ic-service-grid">
+          {services.map(({ title, text, Icon }, index) => (
+            <article className="ic-service-card ic-reveal" key={title}>
+              <div className="ic-service-top"><span>0{index + 1}</span><Icon aria-hidden="true" /></div>
+              <h3>{title}</h3><p>{text}</p>
+              <button onClick={() => openQuote(title)}>ENQUIRE <ArrowRight size={14} /></button>
+            </article>
+          ))}
+        </div>
+        <div className="ic-safety-note"><ShieldCheck /><p><strong>Safety belongs in every pour plan.</strong> Confirm site access, traffic movement and pour coordination with the team before delivery.</p></div>
+      </section>
 
-      <section className="icon-lab"><div className="icon-lab-photo"><img src={img('photo-1581092160562-40aa08e78837')} alt="Concrete quality testing in a materials laboratory"/><span>QUALITY / TESTING</span></div><div className="icon-lab-copy"><div className="icon-kicker">QUALITY / IN-HOUSE LAB</div><h2>Measured.<br/><em>Tested.</em></h2><p>The company’s published plant information lists 25 laboratory equipment line items. Ask about quality documentation relevant to your grade and project.</p><div className="icon-lab-metrics"><div><strong>25</strong><span>lab equipment<br/>line items</span></div><div><strong>2</strong><span>cube testing<br/>machines</span></div><div><strong>102</strong><span>cube<br/>moulds</span></div></div><ul><li><Check/> Accelerated curing tank</li><li><Check/> Rebound hammer</li><li><Check/> Grades from M10 through M60</li></ul><button className="icon-lab-request" onClick={()=>{setSubmitted(false);setQuoteOpen(true);}}>REQUEST QUALITY DETAILS <ArrowRight size={15}/></button><small className="icon-lab-note">Certifications and accreditation are not represented here; confirm current status with the company.</small></div></section>
+      <section className="ic-process ic-section">
+        <div className="ic-process-intro ic-reveal"><SectionLabel number="04">HOW WE WORK</SectionLabel><h2>One clear plan.<br /><em>Four steps.</em></h2><p>Each project has its own requirements. We coordinate the details with you and confirm availability before the pour.</p></div>
+        <div className="ic-timeline">
+          {[
+            ['01', 'Plan the mix', 'Start with the grade and application from your project specification.'],
+            ['02', 'Batch at plant', 'The plant team prepares the order with computerised batching.'],
+            ['03', 'Transport & deliver', 'Coordinate route, access and timing for your project site.'],
+            ['04', 'Pour & support', 'Confirm site readiness, safety needs and pump requirements.'],
+          ].map(([n, title, detail]) => <article className="ic-step ic-reveal" key={n}><span>{n}</span><div><h3>{title}</h3><p>{detail}</p></div><ArrowRight aria-hidden="true" /></article>)}
+        </div>
+      </section>
 
-      <section className="icon-clients" id="clients"><div className="icon-kicker">05 / PROJECT PARTNERS</div><div className="icon-clients-row"><h2>Built on<br/><em>relationships.</em></h2><div className="icon-client-logos">{clients.map(client=><span key={client}>{client}</span>)}</div></div><div className="icon-client-proof"><strong>~40</strong><p>developer and contractor marks are listed on the current company website. We’re preparing a verified project library with named pours, grades and delivery details.</p><button onClick={()=>{setEnquiryType('project-supply');setSubmitted(false);setQuoteOpen(true);}}>DEVELOPER / PROJECT ENQUIRY <ArrowRight size={14}/></button></div><p>Client names are shown as a preview from the source site. Confirm client permission and project references before publication.</p></section>
+      <section className="ic-grade-section ic-section" id="grades">
+        <div className="ic-grade-heading ic-reveal"><div><SectionLabel number="05">CONCRETE GRADE GUIDE</SectionLabel><h2>Start with the<br /><em>specification.</em></h2></div><div className="ic-confirm-tag">[CONFIRM GRADES OFFERED]</div></div>
+        <p className="ic-grade-note">Common grades and example applications are shown as a planning guide. Final grade and use must follow the project engineer’s specification and be confirmed with Icon Concrete.</p>
+        <div className="ic-grade-tabs" role="tablist" aria-label="Concrete grades">
+          {grades.map((item) => <button key={item.name} role="tab" aria-selected={activeGrade === item.name} className={activeGrade === item.name ? 'active' : ''} onClick={() => setActiveGrade(item.name)}>{item.name}</button>)}
+        </div>
+        <div className="ic-grade-detail" role="tabpanel"><strong>{activeGrade}</strong><div><span>EXAMPLE APPLICATION</span><h3>{grades.find((item) => item.name === activeGrade)?.use}</h3></div><p>Confirm grade availability and suitability with your structural engineer and Icon Concrete.</p><button className="ic-text-link" onClick={() => { setGrade(activeGrade); openQuote('Ready-mix concrete'); }}>ASK ABOUT {activeGrade} <ArrowRight size={15} /></button></div>
+      </section>
 
-      <section className="icon-plants" id="plants"><div className="icon-plants-head"><div><div className="icon-kicker">PLANT NETWORK / TELANGANA</div><h2>Closer to<br/><em>your site.</em></h2></div><div className="icon-tabs">{['Plant 1 · Mirazaguda','Plant 2 · Gowdavalli'].map(x=><button key={x} className={activePlant===x?'active':''} onClick={()=>setActivePlant(x)}>{x}</button>)}</div></div><div className="icon-plant-card"><img src={img(activePlant.startsWith('Plant 1')?'photo-1487958449943-2429e8be8625':'photo-1504307651254-35680f356dfd')} alt={`${activePlant} concrete production plant`}/><div className="icon-plant-details"><span>{activePlant.startsWith('Plant 1')?'01':'02'} / PRODUCTION FACILITY</span><h3>{activePlant.startsWith('Plant 1')?'Mirazaguda':'Gowdavalli'}</h3><p>{activePlant.startsWith('Plant 1')?'Sankarapalli Mandal · 3.5-acre facility':'Medchal · 3.2-acre facility'}</p><div><strong>{activePlant.startsWith('Plant 1')?'60':'45'}<small>m³/hr</small></strong><span>Batching capacity</span></div><a href="https://wa.me/917997777078?text=Hi%20Icon%20Concrete%2C%20please%20share%20plant%20and%20delivery%20coverage%20details." target="_blank" rel="noreferrer">ASK ABOUT DELIVERY COVERAGE <ArrowRight size={14}/></a></div></div></section>
+      <section className="ic-planner" id="planner">
+        <div className="ic-planner-copy ic-reveal"><SectionLabel number="06">INTERACTIVE POUR PLANNER</SectionLabel><h2>Make a plan<br />for the <em>pour.</em></h2><p>Choose an application, review grade options and estimate concrete volume. Your selections carry into the quote form.</p><div className="ic-planner-badge"><ClipboardCheck /><span>Project specification always takes priority.</span></div></div>
+        <div className="ic-planner-card ic-reveal">
+          <div className="ic-plan-top"><span>POUR PLANNER / {String(wizardStep + 1).padStart(2, '0')}</span><div>{['STRUCTURE', 'GRADE', 'VOLUME'].map((step, index) => <button key={step} className={wizardStep === index ? 'active' : ''} onClick={() => setWizardStep(index)} aria-label={`Go to ${step.toLowerCase()} step`}>{String(index + 1).padStart(2, '0')} <span>{step}</span></button>)}</div></div>
+          <div className="ic-plan-body">
+            <div className="ic-plan-graphic" aria-hidden="true"><div className="ic-plan-ring ring-one" /><div className="ic-plan-ring ring-two" /><div className="ic-plan-cube"><span>{wizardStep === 0 ? application.toUpperCase() : wizardStep === 1 ? grade : `${volume || '—'} m³`}</span></div><span className="ic-plan-coordinate">17°29' N<br />78°26' E</span><span className="ic-plan-grid-id">ICON / SITE PLAN</span></div>
+            <div className="ic-plan-controls">
+              {wizardStep === 0 && <><span className="ic-mini-label">01 / WHAT ARE YOU POURING?</span><h3>Choose a structure</h3><div className="ic-choice-grid">{['Foundation', 'Slab', 'Columns & core', 'Infrastructure'].map((item) => <button key={item} className={application === item ? 'selected' : ''} onClick={() => setApplication(item)}>{item}{application === item && <Check size={15} />}</button>)}</div><button className="ic-button ic-button-dark" onClick={() => setWizardStep(1)}>NEXT / CHOOSE GRADE <ArrowRight size={16} /></button></>}
+              {wizardStep === 1 && <><span className="ic-mini-label">02 / CHECK THE DRAWING</span><h3>Select a grade</h3><p>Use the grade on your engineer’s specification. Availability needs confirmation.</p><div className="ic-plan-grades">{grades.map((item) => <button key={item.name} className={grade === item.name ? 'selected' : ''} onClick={() => setGrade(item.name)}>{item.name}</button>)}</div><div className="ic-choice-grid ic-service-choices">{['Ready-mix concrete', 'Concrete pumping'].map((item) => <button key={item} className={service === item ? 'selected' : ''} onClick={() => setService(item)}>{item}{service === item && <Check size={15} />}</button>)}</div><div className="ic-plan-nav"><button onClick={() => setWizardStep(0)}>BACK</button><button className="ic-button ic-button-dark" onClick={() => setWizardStep(2)}>NEXT / ESTIMATE VOLUME <ArrowRight size={16} /></button></div></>}
+              {wizardStep === 2 && <><span className="ic-mini-label">03 / ESTIMATE YOUR VOLUME</span><h3>Size the pour</h3><p>Enter dimensions in metres. This estimate is for planning and should be checked against your project drawings.</p><div className="ic-calculator-types" role="group" aria-label="Choose a volume calculator">{['Slab', 'Footing', 'Column'].map((type) => <button key={type} className={calculatorType === type ? 'selected' : ''} onClick={() => setCalculatorType(type)}>{type}</button>)}</div><div className="ic-volume-fields">{[['length', calculatorType === 'Column' ? 'Width (m)' : 'Length (m)'], ['width', 'Width (m)'], ['thickness', calculatorType === 'Column' ? 'Height (m)' : calculatorType === 'Footing' ? 'Depth (mm)' : 'Thickness (mm)']].map(([key, label]) => <label key={key}>{label}<input type="number" inputMode="decimal" min="0" step="0.01" value={dimensions[key]} onChange={(event) => updateDimension(key, event.target.value)} /></label>)}</div><div className="ic-volume-result"><span>ESTIMATED VOLUME</span><strong>{calculatedVolume ? calculatedVolume : '—'} <small>m³</small></strong></div><div className="ic-plan-nav"><button onClick={() => setWizardStep(1)}>BACK</button><button className="ic-button ic-button-dark" onClick={() => { if (calculatedVolume) setVolume(String(calculatedVolume)); openQuote(); }}>GET QUOTE FOR THIS VOLUME <ArrowRight size={16} /></button></div></>}
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <section className="icon-contact" id="contact"><div className="icon-contact-inner"><div><div className="icon-kicker">06 / LET’S PLAN YOUR POUR</div><h2>Your site is<br/>the <em>starting point.</em></h2><p>Share your grade, volume and delivery location. Our team will get back to coordinate the next steps.</p></div><div className="icon-contact-actions"><button className="icon-button icon-button-light" onClick={()=>{setSubmitted(false);setQuoteOpen(true);}}>REQUEST A QUOTE <ArrowRight size={16}/></button><a href="tel:+917997777078"><Phone size={17}/> +91 79977 77078</a><span><MapPin size={17}/> Hyderabad & Medchal corridor</span></div></div></section>
+      <section className="ic-projects ic-section" id="projects">
+        <div className="ic-section-heading ic-reveal"><div><SectionLabel number="07">CLIENTS & PROJECTS</SectionLabel><h2>Work worth<br /><em>building on.</em></h2></div><p>Project photography and case study details will be added after real site photos and client approvals are available.</p></div>
+        <div className="ic-project-filters" role="group" aria-label="Filter project gallery">{['All', 'Residential', 'Commercial', 'Infrastructure'].map((item) => <button key={item} className={projectFilter === item ? 'active' : ''} onClick={() => setProjectFilter(item)}>{item}</button>)}</div>
+        <div className="ic-project-grid">{visibleProjects.map((item) => <button className="ic-project-card ic-reveal" key={item.title} onClick={() => setLightbox(item)} aria-label={`View ${item.title} placeholder`}><img src={image(item.image, 900)} alt={`${item.category} construction photo placeholder — replace with real photo`} loading="lazy" /><span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span><span className="ic-project-meta">{item.category} / CASE STUDY PLACEHOLDER</span><strong>{item.title}</strong><span className="ic-project-open">VIEW DETAILS <ArrowRight size={14} /></span></button>)}</div>
+        <div className="ic-client-strip"><SectionLabel number="08">CLIENTS</SectionLabel><div>{partners.map((client) => <span key={client}>{client}</span>)}</div><small>Client names shown for reference; confirm logo usage and permissions before publication.</small></div>
+      </section>
 
-      <footer className="icon-footer"><a className="icon-wordmark" href="#top"><span className="icon-mark">I</span><span>ICON<small>CONCRETE</small></span></a><span>READY MIX CONCRETE · HYDERABAD</span><a href="#top">BACK TO TOP ↑</a><small>© {new Date().getFullYear()} Icon Concrete. Project details and availability subject to confirmation.</small></footer>
+      <section className="ic-testimonials ic-section">
+        <div className="ic-testimonial-heading ic-reveal"><SectionLabel number="09">CLIENT WORDS</SectionLabel><h2>Trust built<br />through <em>work.</em></h2><p>Testimonials from the existing Icon Concrete website.</p></div>
+        <article className="ic-quote-card ic-reveal"><span className="ic-quote-mark">“</span><blockquote>{testimonials[testimonial].quote}</blockquote><div className="ic-quote-credit"><span className="ic-quote-initials">{testimonials[testimonial].name.slice(0, 2).toUpperCase()}</span><span><strong>{testimonials[testimonial].name}</strong><small>{testimonials[testimonial].role}</small></span></div><div className="ic-quote-controls"><span>{String(testimonial + 1).padStart(2, '0')} / {String(testimonials.length).padStart(2, '0')}</span><button aria-label="Previous testimonial" onClick={() => setTestimonial((testimonial + testimonials.length - 1) % testimonials.length)}><ChevronLeft /></button><button aria-label="Next testimonial" onClick={() => setTestimonial((testimonial + 1) % testimonials.length)}><ChevronRight /></button></div></article>
+      </section>
 
-      <div className="icon-sticky"><div><small>YOUR POUR PLAN</small><strong>{summary}</strong></div><button onClick={()=>{setSubmitted(false);setQuoteOpen(true);}}>GET A QUOTE <ArrowRight size={15}/></button></div>
+      <section className="ic-gallery ic-section" id="gallery">
+        <div className="ic-gallery-heading ic-reveal"><SectionLabel number="10">GALLERY</SectionLabel><h2>On site.<br /><em>In progress.</em></h2><p>Image placeholders are clearly marked. Replace them with approved photos from Icon Concrete plants, mixers and site pours.</p></div>
+        <div className="ic-gallery-grid">{projects.slice(0, 3).map((item, index) => <button key={item.title} className={`ic-gallery-item ic-gallery-${index + 1} ic-reveal`} onClick={() => setLightbox(item)}><img src={image(item.image, 1000)} alt={`${item.category} site photo placeholder — replace with real photo`} loading="lazy" /><span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span><span>{item.category} / 0{index + 1}</span></button>)}</div>
+      </section>
 
-      {quoteOpen&&<div className="icon-modal-backdrop" role="presentation" onMouseDown={e=>{if(e.target===e.currentTarget)setQuoteOpen(false);}}><section className="icon-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title"><button className="icon-modal-close" aria-label="Close quote form" onClick={()=>setQuoteOpen(false)}><X/></button>{submitted?<div className="icon-success"><span><Check/></span><h2>Ready for the next step.</h2><p>Your enquiry is prepared in WhatsApp. Review the details and send the message to connect with the Icon Concrete team.</p><button className="icon-button icon-button-dark" onClick={()=>setQuoteOpen(false)}>DONE <Check size={16}/></button></div>:<><div className="icon-kicker">{enquiryType==='project-supply'?'PROJECT SUPPLY ENQUIRY':'SINGLE POUR ENQUIRY'} / {grade}</div><h2 id="quote-title">Let’s plan<br/>your pour.</h2><p className="icon-modal-summary">{summary} · our team will confirm mix, coverage and availability.</p><form onSubmit={sendEnquiry}><label>Your name<input required value={form.name} onChange={e=>setForm({...form,name:e.target.value})} placeholder="Name"/></label><label>Phone number<input required type="tel" pattern="[0-9+() -]{8,}" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} placeholder="+91"/></label><label>Project type<select value={form.projectType} onChange={e=>setForm({...form,projectType:e.target.value})}><option>Residential</option><option>High-rise</option><option>Commercial</option><option>Infrastructure</option><option>Industrial</option><option>Other</option></select></label>{enquiryType==='project-supply'&&<label>Company / project name<input required value={form.company} onChange={e=>setForm({...form,company:e.target.value})} placeholder="Company or project"/></label>}<label className="icon-form-wide">Site location<input required value={form.location} onChange={e=>setForm({...form,location:e.target.value})} placeholder="Area or project address"/></label><label className="icon-form-wide">Planned pour date<input type="date" value={form.date} onChange={e=>setForm({...form,date:e.target.value})}/></label><button className="icon-button icon-button-dark icon-full" type="submit">CONTINUE TO WHATSAPP <ArrowRight size={16}/></button><small>Submitting opens WhatsApp with your enquiry details for you to review and send.</small></form></>}</section></div>}
+      <section className="ic-plants ic-section" id="plants">
+        <div className="ic-section-heading ic-reveal"><div><SectionLabel number="11">HYDERABAD PLANT NETWORK</SectionLabel><h2>Closer to<br /><em>your site.</em></h2></div><p>Two plant locations serve the Hyderabad area. Share your project location so the team can confirm the nearest plant and delivery coverage.</p></div>
+        <div className="ic-plant-grid">{plants.map((item, index) => <article className={`ic-plant-card ic-reveal ${plant === item.id ? 'is-active' : ''}`} key={item.id} onMouseEnter={() => setPlant(item.id)}><div className="ic-plant-image"><img src={image(item.photo, 1100)} alt={`${item.name} facility photo placeholder — replace with real photo`} loading="lazy" /><span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span><span className="ic-plant-index">0{index + 1} / PLANT</span></div><div className="ic-plant-content"><h3>{item.name}</h3><p><MapPin size={16} />{item.address}</p><span className="ic-nearest"><Check size={14} /> Ask which plant is nearest to your site.</span><div className="ic-plant-links"><a href={item.map} target="_blank" rel="noreferrer">OPEN MAP <ArrowRight size={14} /></a><button onClick={() => { setPlant(item.id); setForm((current) => ({ ...current, location: item.address })); openQuote(); }}>ENQUIRE <ArrowRight size={14} /></button></div></div></article>)}</div>
+      </section>
+
+      <section className="ic-contact" id="contact">
+        <div className="ic-contact-main ic-reveal"><SectionLabel number="12">PLAN YOUR NEXT POUR</SectionLabel><h2>Ready when<br />your site <em>is.</em></h2><p>Send the project location, grade, volume and preferred date. Get a response from the Icon Concrete team to discuss availability.</p><button className="ic-button ic-button-orange" onClick={() => openQuote()}>GET A QUOTE IN 30 MINUTES <ArrowRight size={17} /></button><small>Response time is a target and needs confirmation with the company.</small></div>
+        <div className="ic-contact-details ic-reveal"><div><span>CALL THE TEAM</span><a href="tel:+917997777078"><Phone size={17} />{phone}</a></div><div><span>EMAIL</span><a href={`mailto:${email}`}>{email}</a></div><div><span>WHATSAPP</span><a href={`https://wa.me/${phoneDigits}`} target="_blank" rel="noreferrer"><MessageCircle size={17} />Message Icon Concrete</a></div><div><span>BASED IN</span><strong>Hyderabad, Telangana, India</strong></div></div>
+      </section>
+
+      <footer className="ic-footer">
+        <a className="ic-brand" href="#top" aria-label="Icon Concrete home"><span className="ic-brand-symbol">I</span><span className="ic-brand-type">ICON<small>CONCRETE</small></span></a>
+        <span>READY-MIX CONCRETE · HYDERABAD · EST. 2017</span><div><a href="#about">About</a><a href="#services">Services</a><a href="#projects">Projects</a><a href="#contact">Contact</a></div>
+        <small>© {new Date().getFullYear()} Icon Premier Readymix Concrete. Project details, grades and availability must be confirmed.</small>
+      </footer>
+
+      <div className="ic-mobile-bar"><a href="tel:+917997777078" aria-label="Call Icon Concrete"><Phone /></a><a href={`https://wa.me/${phoneDigits}`} target="_blank" rel="noreferrer" aria-label="WhatsApp Icon Concrete"><MessageCircle /></a><button onClick={() => openQuote()}>REQUEST A QUOTE <ArrowRight size={16} /></button></div>
+      <a className="ic-float-whatsapp" href={`https://wa.me/${phoneDigits}`} target="_blank" rel="noreferrer" aria-label="Chat with Icon Concrete on WhatsApp"><MessageCircle /></a>
+
+      {quoteOpen && <div className="ic-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setQuoteOpen(false); }}><section className="ic-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title"><button className="ic-modal-close" aria-label="Close quote form" onClick={() => setQuoteOpen(false)}><X /></button>{quoteSent ? <div className="ic-quote-success"><span><Check /></span><SectionLabel number="QUOTE REQUEST">DETAILS READY</SectionLabel><h2 id="quote-title">One last step.</h2><p>Review your enquiry in WhatsApp and press send to contact the Icon Concrete team.</p><a className="ic-button ic-button-orange" href={whatsappUrl} target="_blank" rel="noreferrer">SEND VIA WHATSAPP <ArrowRight size={16} /></a><button className="ic-modal-back" onClick={() => setQuoteSent(false)}>EDIT DETAILS</button></div> : <><SectionLabel number="QUOTE REQUEST">YOUR PROJECT DETAILS</SectionLabel><h2 id="quote-title">Let’s plan<br />your pour.</h2><p className="ic-modal-summary">{quoteSummary} · The team will confirm mix availability, plant coverage and schedule.</p><form onSubmit={submitQuote}><label>Name<input required autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label><label>Phone<input required type="tel" autoComplete="tel" pattern="[0-9+() -]{8,}" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="+91" /></label><label>Project type<select value={form.projectType} onChange={(event) => setForm({ ...form, projectType: event.target.value })}><option>Residential</option><option>Commercial</option><option>Infrastructure</option><option>Industrial</option><option>Other</option></select></label><label>Concrete grade<select value={grade} onChange={(event) => setGrade(event.target.value)}>{grades.map((item) => <option key={item.name}>{item.name}</option>)}</select></label><label className="ic-form-wide">Project location<input required autoComplete="street-address" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Area or project address" /></label><label>Quantity (m³)<input required type="number" min="0.1" step="0.1" value={volume} onChange={(event) => setVolume(event.target.value)} /></label><label>Pump required?<select value={pump} onChange={(event) => setPump(event.target.value)}><option>No</option><option>Yes</option><option>Need advice</option></select></label><label className="ic-form-wide">Required date<input required type="date" min={new Date().toISOString().slice(0, 10)} value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} /></label><label className="ic-form-wide">Company / project name <span className="ic-optional">Optional</span><input value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} /></label><button className="ic-button ic-button-dark ic-form-wide" type="submit">PREPARE WHATSAPP ENQUIRY <ArrowRight size={16} /></button><small className="ic-form-wide">Your browser will prepare a WhatsApp message. Nothing is sent until you press send in WhatsApp.</small></form></>}</section></div>}
+
+      {lightbox && <div className="ic-lightbox" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setLightbox(null); }}><button className="ic-lightbox-close" onClick={() => setLightbox(null)} aria-label="Close project detail"><X /></button><img src={image(lightbox.image, 1400)} alt={`${lightbox.category} project photo placeholder — replace with real photo`} /><div><span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span><span>{lightbox.category} / PROJECT PLACEHOLDER</span><h2>{lightbox.title}</h2><p>{lightbox.description}</p><button className="ic-button ic-button-orange" onClick={() => { setLightbox(null); openQuote(); }}>DISCUSS A SIMILAR PROJECT <ArrowRight size={16} /></button></div></div>}
     </main>
   );
 }

@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://icon-concrete-prototype.vercel.app/sitemap.xml
