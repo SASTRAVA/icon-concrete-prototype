@@ -107,6 +107,24 @@ export default function IconReadymix() {
   }, []);
 
   useEffect(() => {
+    const heroImage = document.querySelector('.ic-hero-image');
+    if (!heroImage || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const offset = Math.min(window.scrollY, window.innerHeight) * 0.12;
+        heroImage.style.transform = `translate3d(0, ${offset}px, 0) scale(1.05)`;
+      });
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!quoteOpen && !lightbox) return undefined;
     const closeOnEscape = (event) => {
       if (event.key === 'Escape') { setQuoteOpen(false); setLightbox(null); }
@@ -264,7 +282,7 @@ export default function IconReadymix() {
 
       <section className="ic-plants ic-section" id="plants">
         <div className="ic-section-heading ic-reveal"><div><SectionLabel number="11">HYDERABAD PLANT NETWORK</SectionLabel><h2>Closer to<br /><em>your site.</em></h2></div><p>Two plant locations serve the Hyderabad area. Share your project location so the team can confirm the nearest plant and delivery coverage.</p></div>
-        <div className="ic-plant-grid">{plants.map((item, index) => <article className={`ic-plant-card ic-reveal ${plant === item.id ? 'is-active' : ''}`} key={item.id} onMouseEnter={() => setPlant(item.id)}><div className="ic-plant-image"><img src={image(item.photo, 1100)} alt={`${item.name} facility photo placeholder — replace with real photo`} loading="lazy" /><span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span><span className="ic-plant-index">0{index + 1} / PLANT</span></div><div className="ic-plant-content"><h3>{item.name}</h3><p><MapPin size={16} />{item.address}</p><span className="ic-nearest"><Check size={14} /> Ask which plant is nearest to your site.</span><div className="ic-plant-links"><a href={item.map} target="_blank" rel="noreferrer">OPEN MAP <ArrowRight size={14} /></a><button onClick={() => { setPlant(item.id); setForm((current) => ({ ...current, location: item.address })); openQuote(); }}>ENQUIRE <ArrowRight size={14} /></button></div></div></article>)}</div>
+        <div className="ic-plant-grid">{plants.map((item, index) => <article className={`ic-plant-card ic-reveal ${plant === item.id ? 'is-active' : ''}`} key={item.id} onMouseEnter={() => setPlant(item.id)}><div className="ic-plant-image"><img src={image(item.photo, 1100)} alt={`${item.name} facility photo placeholder — replace with real photo`} loading="lazy" /><span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span><span className="ic-plant-index">0{index + 1} / PLANT</span></div><iframe className="ic-plant-map" title={"Map to Icon Concrete plant at " + item.name} src={"https://maps.google.com/maps?q=" + encodeURIComponent(item.address) + "&output=embed"} loading="lazy" referrerPolicy="no-referrer-when-downgrade" /><div className="ic-plant-content"><h3>{item.name}</h3><p><MapPin size={16} />{item.address}</p><span className="ic-nearest"><Check size={14} /> Ask which plant is nearest to your site.</span><div className="ic-plant-links"><a href={item.map} target="_blank" rel="noreferrer">OPEN MAP <ArrowRight size={14} /></a><a href="tel:+917997777078">CALL {phone} <Phone size={14} /></a><button onClick={() => { setPlant(item.id); setForm((current) => ({ ...current, location: item.address })); openQuote(); }}>ENQUIRE <ArrowRight size={14} /></button></div></div></article>)}</div>
       </section>
 
       <section className="ic-contact" id="contact">
@@ -279,8 +297,6 @@ export default function IconReadymix() {
       </footer>
 
       <div className="ic-mobile-bar"><a href="tel:+917997777078" aria-label="Call Icon Concrete"><Phone /></a><a href={`https://wa.me/${phoneDigits}`} target="_blank" rel="noreferrer" aria-label="WhatsApp Icon Concrete"><MessageCircle /></a><button onClick={() => openQuote()}>REQUEST A QUOTE <ArrowRight size={16} /></button></div>
-      <a className="ic-float-whatsapp" href={`https://wa.me/${phoneDigits}`} target="_blank" rel="noreferrer" aria-label="Chat with Icon Concrete on WhatsApp"><MessageCircle /></a>
-
       {quoteOpen && <div className="ic-modal-backdrop" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setQuoteOpen(false); }}><section className="ic-modal" role="dialog" aria-modal="true" aria-labelledby="quote-title"><button className="ic-modal-close" aria-label="Close quote form" onClick={() => setQuoteOpen(false)}><X /></button>{quoteSent ? <div className="ic-quote-success"><span><Check /></span><SectionLabel number="QUOTE REQUEST">DETAILS READY</SectionLabel><h2 id="quote-title">One last step.</h2><p>Review your enquiry in WhatsApp and press send to contact the Icon Concrete team.</p><a className="ic-button ic-button-orange" href={whatsappUrl} target="_blank" rel="noreferrer">SEND VIA WHATSAPP <ArrowRight size={16} /></a><button className="ic-modal-back" onClick={() => setQuoteSent(false)}>EDIT DETAILS</button></div> : <><SectionLabel number="QUOTE REQUEST">YOUR PROJECT DETAILS</SectionLabel><h2 id="quote-title">Let’s plan<br />your pour.</h2><p className="ic-modal-summary">{quoteSummary} · The team will confirm mix availability, plant coverage and schedule.</p><form onSubmit={submitQuote}><label>Name<input required autoComplete="name" value={form.name} onChange={(event) => setForm({ ...form, name: event.target.value })} /></label><label>Phone<input required type="tel" autoComplete="tel" pattern="[0-9+() -]{8,}" value={form.phone} onChange={(event) => setForm({ ...form, phone: event.target.value })} placeholder="+91" /></label><label>Project type<select value={form.projectType} onChange={(event) => setForm({ ...form, projectType: event.target.value })}><option>Residential</option><option>Commercial</option><option>Infrastructure</option><option>Industrial</option><option>Other</option></select></label><label>Concrete grade<select value={grade} onChange={(event) => setGrade(event.target.value)}>{grades.map((item) => <option key={item.name}>{item.name}</option>)}</select></label><label className="ic-form-wide">Project location<input required autoComplete="street-address" value={form.location} onChange={(event) => setForm({ ...form, location: event.target.value })} placeholder="Area or project address" /></label><label>Quantity (m³)<input required type="number" min="0.1" step="0.1" value={volume} onChange={(event) => setVolume(event.target.value)} /></label><label>Pump required?<select value={pump} onChange={(event) => setPump(event.target.value)}><option>No</option><option>Yes</option><option>Need advice</option></select></label><label className="ic-form-wide">Required date<input required type="date" min={new Date().toISOString().slice(0, 10)} value={form.date} onChange={(event) => setForm({ ...form, date: event.target.value })} /></label><label className="ic-form-wide">Company / project name <span className="ic-optional">Optional</span><input value={form.company} onChange={(event) => setForm({ ...form, company: event.target.value })} /></label><button className="ic-button ic-button-dark ic-form-wide" type="submit">PREPARE WHATSAPP ENQUIRY <ArrowRight size={16} /></button><small className="ic-form-wide">Your browser will prepare a WhatsApp message. Nothing is sent until you press send in WhatsApp.</small></form></>}</section></div>}
 
       {lightbox && <div className="ic-lightbox" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) setLightbox(null); }}><button className="ic-lightbox-close" onClick={() => setLightbox(null)} aria-label="Close project detail"><X /></button><img src={image(lightbox.image, 1400)} alt={`${lightbox.category} project photo placeholder — replace with real photo`} /><div><span className="ic-photo-placeholder">REPLACE WITH REAL PHOTO</span><span>{lightbox.category} / PROJECT PLACEHOLDER</span><h2>{lightbox.title}</h2><p>{lightbox.description}</p><button className="ic-button ic-button-orange" onClick={() => { setLightbox(null); openQuote(); }}>DISCUSS A SIMILAR PROJECT <ArrowRight size={16} /></button></div></div>}
